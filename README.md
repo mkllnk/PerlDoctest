@@ -8,15 +8,15 @@ The principle comes from the python community. Python's doctest executes example
 Your code comment could look like this:
 
 ```perl
-=head1 Example
+=head1 Addition in Perl is simple
 
-  $ 1 + 1
-  2
+  $ 2 + 3
+  5
 
 =cut
 ```
 
-Doctest will execute `1 + 1` and compare the result with `2`.
+Doctest will execute `2 + 3` and compare the result to `5`.
 
 
 Running
