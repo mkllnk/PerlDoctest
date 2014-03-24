@@ -16,18 +16,23 @@ Your code comment could look like this:
 =cut
 ```
 
-Doctest will execute `1 + 1` and compare the result with `2`. There are three ways to run it.
+Doctest will execute `1 + 1` and compare the result with `2`.
 
-  # Command line: you have to specify the module to test, here Example.
-  perl -MTest::Doctest -MExample -e 'runtests @ARGV' Example.pm
 
-Or in your custom script.
+Running
+-------
+
+There are three ways to run it. The first is directly from the command line. But you have to specify the module to test, in this example the module ist named 'Example'.
+
+    perl -MTest::Doctest -MExample -e 'runtests @ARGV' Example.pm
+
+Or you can write your custom test script.
 
 ```perl
   use Test::Doctest;
   runtests($filepath);
 ```
-or
+You can also specify a file handle.
 ```perl
   # or
   use Test::Doctest;
