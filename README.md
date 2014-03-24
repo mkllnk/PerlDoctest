@@ -4,7 +4,7 @@ Doctests for Perl
 Doctest verifies your documentation and your code at the same time.
 By executing usage examples in your documenation it validates that your documentation is up-to-date and that your code is behaving like documented.
 
-The principle comes from the python community. Python's doctest executes examples in so called docstrings. In perl the usage examples are found in pod.
+The principle comes from the python community. [Python's doctest][1] executes examples in so called docstrings. In perl the usage examples are found in [pod][2].
 Your code comment could look like this:
 
 ```perl
@@ -41,4 +41,10 @@ You can also specify a file handle.
   $p->test;
 ```
 
-This module was written by Bryan Cardillo and published under the same terms as Perl itself.
+Further documentation is contained in the [code][3] itself.
+This module was written by [Bryan Cardillo][4] and published under the same terms as Perl itself.
+
+[1]http://docs.python.org/2/library/doctest.html
+[2]http://perldoc.perl.org/perlpod.html
+[3]https://github.com/mkllnk/PerlDoctest/blob/master/lib/Test/Doctest.pm
+[4]http://blog.crdlo.com/2010/04/doctests-for-perl.html
