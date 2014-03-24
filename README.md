@@ -44,7 +44,7 @@ You can also specify a file handle.
 Further documentation is contained in the [code][3] itself.
 This module was written by [Bryan Cardillo][4] and published under the same terms as Perl itself.
 
-[1]http://docs.python.org/2/library/doctest.html
-[2]http://perldoc.perl.org/perlpod.html
-[3]https://github.com/mkllnk/PerlDoctest/blob/master/lib/Test/Doctest.pm
-[4]http://blog.crdlo.com/2010/04/doctests-for-perl.html
+[1]: http://docs.python.org/2/library/doctest.html
+[2]: http://perldoc.perl.org/perlpod.html
+[3]: https://github.com/mkllnk/PerlDoctest/blob/master/lib/Test/Doctest.pm
+[4]: http://blog.crdlo.com/2010/04/doctests-for-perl.html
