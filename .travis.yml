@@ -1,0 +1,5 @@
+language: perl
+perl:
+  - "5.005"
+
+script: "prove -r"
