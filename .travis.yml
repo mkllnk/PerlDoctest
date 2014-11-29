@@ -4,6 +4,6 @@ perl:
   - "5.12"
 
 install:
-  - cpanm Test::More -v --notest --mirror http://cpan.mirrors.travis-ci.org .
+  - cpanm Test::More -v --notest --mirror http://cpan.mirrors.travis-ci.org
 
 script: "prove -r"
