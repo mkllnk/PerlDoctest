@@ -3,5 +3,7 @@ perl:
   - "5.01"
   - "5.12"
 
-install: ""
+install:
+  - cpanm Test::More -v --notest --mirror http://cpan.mirrors.travis-ci.org .
+
 script: "prove -r"
