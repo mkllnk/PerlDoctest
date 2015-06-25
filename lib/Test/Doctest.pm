@@ -7,7 +7,7 @@ require Exporter;
 require Pod::Parser;
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA = qw(Exporter Pod::Parser);
-@EXPORT = qw(runtests);
+@EXPORT = qw(run runtests);
 $VERSION = '0.01';
  
 use Carp;
@@ -20,7 +20,7 @@ Test::Doctest - extract and evaluate tests from pod fragments
  
 =head1 SYNOPSIS
  
-  perl -MTest::Doctest -e 'runtests @ARGV' lib/Some/Module.pm
+  perl -MTest::Doctest -e run lib/Some/Module.pm
  
   - or -
  
@@ -69,14 +69,14 @@ Extract and run tests from pod for each file argument.
 =end
  
 =cut
- 
+
 sub runtests {
   my ($total, $success, @tests) = (0, 0);
   my $test = Test::Builder->new;
  
   for (@_) {
     my $t = Test::Doctest->new;
-    $t->parse_from_file($_, devnull);
+    $t->parse_from_file($_);
     $total += @{$t->{tests}};
     push @tests, $t;
   }
@@ -90,6 +90,17 @@ sub runtests {
   }
  
   return $success;
+}
+
+
+sub run { runtests @ARGV }
+
+
+sub parse_from_file {
+  my $self = shift;
+  my $module = shift;
+  $self->{module} = $1 if $module =~ /(.+?)\.pm/;
+  return $self->SUPER::parse_from_file($module, devnull);
 }
  
 =head1 METHODS
@@ -262,11 +273,14 @@ sub test {
   if (!$test->has_plan) {
     $test->plan(tests => scalar @tests);
   }
+
+  eval "use $self->{module};" if $self->{module};
  
   for (@{$self->{tests}}) {
     local $" = ';';
     my ($name, $file, $line, $expect, @code) = @{$_};
-    my $result = eval "sub { @code }->()";
+    unshift(@code, "package $self->{module}") if $self->{module};
+    my $result = eval "@code";
     if ($@) {
       croak $@;
     }
