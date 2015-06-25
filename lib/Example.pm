@@ -21,15 +21,28 @@ use warnings;
   $ undef
   undef
 
-=head2 Variables that are localized inside pod block...
+=head2 Variables that were localized inside pod block...
 
   $ my $foo = 10
   10
 
-...are local to the end of the block and consequent blocks with the same name.
+...are local to the end of the block.
 
   $ $foo *= 2
   20
+
+=head2 Variables that were localized inside pod block...
+
+...and to the end of consequent blocks with the same name.
+
+  $ $foo *= 2
+  40
+
+=head2 But no longer.
+
+  $ no strict 'vars'
+  $ $foo
+  undef
 
 =head2 Tests are being run in the package namespace, so you can easily call subs.
 
@@ -37,6 +50,7 @@ use warnings;
   5
 
 =cut
+
 sub foo {
   return 5;
 }
