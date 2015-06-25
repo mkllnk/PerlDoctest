@@ -53,6 +53,12 @@ B<is_eq> from B<Test::Builder>.
   $ my $p = Pod::Parser->new;
   $ ref $p;
   Pod::Parser
+
+  $ $a = 10
+  10
+
+  $ $a *= 2
+  20
  
 =head1 EXPORTS
  
@@ -99,7 +105,8 @@ sub run { runtests @ARGV }
 sub parse_from_file {
   my $self = shift;
   my $module = shift;
-  $self->{module} = $1 if $module =~ /(.+?)\.pm/;
+  require $module;
+  $self->{module} = $1 if $module =~ m{([^/]+?)\.pm};
   return $self->SUPER::parse_from_file($module, devnull);
 }
  
@@ -113,7 +120,6 @@ B<Pod::Parser::new> when creating a new parser.
  
 =begin initialize
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ @{$t->{tests}}
   0
@@ -122,7 +128,6 @@ B<Pod::Parser::new> when creating a new parser.
  
 =begin custom prompt
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new(prompt => 'abc')
   $ $t->{prompt}
   abc
@@ -144,7 +149,6 @@ current section which is used to name the tests.
  
 =begin command
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ $t->command('head1', "EXAMPLES\nthese are examples", 1)
   $ $t->{name}
@@ -165,7 +169,6 @@ Override B<Pod::Parser::textblock> to ignore normal blocks of pod text.
  
 =begin textblock
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ not defined $t->textblock
   1
@@ -185,7 +188,6 @@ list of tests to be executed.
  
 =begin verbatim
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ $t->verbatim("  \$ 1+1\n  2", 1)
   1
@@ -194,7 +196,6 @@ list of tests to be executed.
  
 =begin verbatim no prompt
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ $t->verbatim("abc", 1)
   0
@@ -203,7 +204,6 @@ list of tests to be executed.
  
 =begin verbatim custom prompt
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new(prompt => '#\s+')
   $ $t->verbatim("  # 1+1\n  2", 1)
   1
@@ -244,7 +244,6 @@ with the expected output using B<Test::Builder::is_eq>.
  
 =begin test empty
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ $t->test
   0
@@ -253,7 +252,6 @@ with the expected output using B<Test::Builder::is_eq>.
  
 =begin test non-empty
  
-  $ use Test::Doctest
   $ my $t = Test::Doctest->new
   $ $t->command('begin', 'test', 1)
   $ $t->verbatim("  \$ 1+1\n  2", 2)
@@ -273,14 +271,11 @@ sub test {
   if (!$test->has_plan) {
     $test->plan(tests => scalar @tests);
   }
-
-  eval "use $self->{module};" if $self->{module};
  
   for (@{$self->{tests}}) {
-    local $" = ';';
     my ($name, $file, $line, $expect, @code) = @{$_};
     unshift(@code, "package $self->{module}") if $self->{module};
-    my $result = eval "@code";
+    my $result = eval join(";", @code);
     if ($@) {
       croak $@;
     }

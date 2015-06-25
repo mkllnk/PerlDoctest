@@ -13,12 +13,11 @@ This is only an example.
   $ 1 + 1
   2
 
-  $ $a = 1;
-  $ $a *= 2
-  2
+  $ $a = 10
+  10
 
   $ $a *= 2
-  4
+  20
 
 =head2 foo
 
