@@ -8,24 +8,30 @@ use warnings;
 
 =head1 Example
 
-This is only an example.
+=head2 This is only an example.
 
   $ 1 + 1
   2
 
-Variables that are localized inside one pod block with same name...
+=head2 Checked values are perl expressons.
+
+  $ 'foo'
+  'foo'
+
+  $ undef
+  undef
+
+=head2 Variables that are localized inside pod block...
 
   $ my $foo = 10
   10
 
-...are local to the end of block.
+...are local to the end of the block and consequent blocks with the same name.
 
   $ $foo *= 2
   20
 
-=head2 foo
-
-Tests are runned in the package namespace, so you can call subs without package name.
+=head2 Tests are being run in the package namespace, so you can easily call subs.
 
   $ foo()
   5

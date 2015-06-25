@@ -52,7 +52,7 @@ B<is_eq> from B<Test::Builder>.
   $ use Pod::Parser;
   $ my $p = Pod::Parser->new;
   $ ref $p;
-  Pod::Parser
+  'Pod::Parser'
 
   $ $a = 10
   10
@@ -137,7 +137,7 @@ B<Pod::Parser::new> when creating a new parser.
  
   $ my $t = Test::Doctest->new(prompt => 'abc')
   $ $t->{prompt}
-  abc
+  'abc'
  
 =end
  
@@ -159,7 +159,7 @@ current section which is used to name the tests.
   $ my $t = Test::Doctest->new
   $ $t->command('head1', "EXAMPLES\nthese are examples", 1)
   $ $t->{name}
-  EXAMPLES
+  'EXAMPLES'
  
 =end
  
@@ -225,7 +225,7 @@ sub verbatim {
   my $name = $self->{name} ? $self->{name} : q{};
   my @lines = split /(?:\r|\n|\r\n)/, $par;
   my @code;
- 
+
   for (@lines) {
     if (/^\s+$prompt(.+)/) {
       # capture code
@@ -233,7 +233,7 @@ sub verbatim {
     } elsif (/^\s+(.+)/ and @code) {
       # on first non-code line, with valid code accumlated
       my $file = $self->input_file ? $self->input_file : 'stdin';
-      push @{$self->{tests}}, [$name, $file, $line, $1, @code];
+      push @{$self->{tests}}, [$name, $file, $line, eval($1), @code];
       @code = ();
     } elsif (/^=cut/) {
       # stop processing on =cut (even without a leading blank line)
@@ -243,7 +243,7 @@ sub verbatim {
  
   return @{$self->{tests}};
 }
- 
+
 =head2 B<test()>
  
 Evaluates each test discovered via parsing and compares the results
