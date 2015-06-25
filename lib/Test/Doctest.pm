@@ -106,7 +106,14 @@ sub parse_from_file {
   my $self = shift;
   my $module = shift;
   require $module;
-  $self->{module} = $1 if $module =~ m{([^/]+?)\.pm};
+  open my $fh, '<', $module or die "Can't open $module: $!";
+  while (<$fh>) {
+    if (/package\s+([\w:]+)/) {
+      $self->{module} = $1;
+      last;
+    }
+  }
+  close $fh;
   return $self->SUPER::parse_from_file($module, devnull);
 }
  
@@ -242,17 +249,12 @@ sub verbatim {
 Evaluates each test discovered via parsing and compares the results
 with the expected output using B<Test::Builder::is_eq>.
  
-=begin test empty
+=begin test
  
   $ my $t = Test::Doctest->new
   $ $t->test
   0
  
-=end
- 
-=begin test non-empty
- 
-  $ my $t = Test::Doctest->new
   $ $t->command('begin', 'test', 1)
   $ $t->verbatim("  \$ 1+1\n  2", 2)
   $ @{$t->{tests}}
@@ -261,28 +263,53 @@ with the expected output using B<Test::Builder::is_eq>.
 =end
  
 =cut
- 
+
+
+our @group_result;
+
+
 sub test {
   my ($self) = @_;
-  my @tests = @{$self->{tests}};
-  my $run = 0;
+  my $tests = $self->{tests};
+
   my $test = Test::Builder->new;
- 
-  if (!$test->has_plan) {
-    $test->plan(tests => scalar @tests);
-  }
- 
-  for (@{$self->{tests}}) {
-    my ($name, $file, $line, $expect, @code) = @{$_};
-    unshift(@code, "package $self->{module}") if $self->{module};
-    my $result = eval join(";", @code);
-    if ($@) {
-      croak $@;
+  $test->plan(tests => scalar @$tests) unless $test->has_plan;
+
+  my (@grouped, $current_group);
+  foreach (@$tests) {
+    if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
+      push(@grouped, $current_group = []);
     }
-    $test->is_eq($result, $expect, "$name ($file, $line)");
-    $run++;
+    push(@$current_group, $_);
   }
- 
+
+  my $run = 0;
+  foreach my $group (@grouped) {
+    my @group_code;
+    unshift(@group_code, "package $self->{module}") if $self->{module};
+    my @group_expect;
+    my $subtest = 0;
+    foreach (@$group) {
+      my ($name, $file, $line, $expect, @code) = @$_;
+      push(@group_expect, [$name, $file, $line, $expect]);
+      my $result_line = pop(@code);
+      push(@group_code, @code);
+      push(@group_code, "\$Test::Doctest::group_result[$subtest] = $result_line");
+      $subtest++;
+    }
+
+    eval join(";", @group_code);
+    croak $@ if $@;
+
+    for (my $i = 0; $i < @group_expect; $i++) {
+      my ($name, $file, $line, $expect) = @{$group_expect[$i]};
+      my $outof = @group_expect > 1 ? sprintf("%d/%d", $i + 1, scalar @group_expect) : q();
+      $test->is_eq($group_result[$i], $expect, "$name $outof ($file, $line)");
+    }
+
+    $run += $subtest;
+  }
+
   return $run;
 }
  
