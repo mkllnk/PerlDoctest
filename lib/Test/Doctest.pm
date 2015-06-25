@@ -107,8 +107,8 @@ sub parse_from_file {
   my $module = shift;
   require $module;
   open my $fh, '<', $module or die "Can't open $module: $!";
-  while (<$fh>) {
-    if (/package\s+([\w:]+)/) {
+  while (my $line = <$fh>) {
+    if ($line =~ /package\s+([\w:]+)/) {
       $self->{module} = $1;
       last;
     }

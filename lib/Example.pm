@@ -1,4 +1,4 @@
-package Test::Example;
+package Some::Namespace::Example;
 
 use strict;
 use warnings;
