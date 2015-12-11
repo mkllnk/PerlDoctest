@@ -1,18 +1,22 @@
 package Test::Doctest;
 
-use 5.005;
+use 5.014;
+use warnings;
 use strict;
+use Data::Dumper 'Dumper';
 
 require Exporter;
 require Pod::Parser;
-use vars qw(@ISA @EXPORT $VERSION);
-@ISA = qw(Exporter Pod::Parser);
-@EXPORT = qw(run runtests);
-$VERSION = '0.01';
+
+use parent 'Exporter';
+use parent 'Pod::Parser';
+
+our $VERSION = '0.02';
+our @EXPORT = qw(run runtests);
 
 use Carp;
 use Test::Builder;
-use File::Spec::Functions qw(devnull);
+use File::Spec::Functions 'devnull';
 
 =head1 NAME
 
@@ -20,45 +24,45 @@ Test::Doctest - extract and evaluate tests from pod fragments
 
 =head1 SYNOPSIS
 
-  perl -MTest::Doctest -e run lib/Some/Module.pm
+perl -MTest::Doctest -e run lib/Some/Module.pm
 
-  - or -
+	- or -
 
-  use Test::Doctest;
-  runtests($filepath);
+	use Test::Doctest;
+	runtests($filepath);
 
-  - or -
+	- or -
 
-  use Test::Doctest;
-  my $p = Test::Doctest->new;
-  $p->parse_from_filehandle(\*STDIN);
-  $p->test;
+	use Test::Doctest;
+	my $p = Test::Doctest->new;
+	$p->parse_from_filehandle(\*STDIN);
+	$p->test;
 
 =head1 DESCRIPTION
 
 B<runtests> uses B<Pod::Parser> to extract pod text from the files
-specified, evaluates each line begining with a prompt ($ by default),
+specified, evaluates each line begining with a prompt (>>>),
 and finally compares the results with the expected output using
 B<is_eq> from B<Test::Builder>.
 
 =head1 EXAMPLES
 
-  $ 1 + 1
-  2
+	>>> 1 + 1
+	2
 
-  $ my @a = qw(2 3 4)
-  3
+	>>> my @a = qw(2 3 4)
+	3
 
-  $ use Pod::Parser;
-  $ my $p = Pod::Parser->new;
-  $ ref $p;
-  'Pod::Parser'
+	>>> use Pod::Parser;
+	>>> my $p = Pod::Parser->new;
+	>>> ref $p;
+	'Pod::Parser'
 
-  $ $a = 10
-  10
+	>>> $a = 10
+	10
 
-  $ $a *= 2
-  20
+	>>> $a *= 2
+	20
 
 =head1 EXPORTS
 
@@ -68,34 +72,32 @@ Extract and run tests from pod for each file argument.
 
 =begin runtests
 
-  $ use Test::Doctest
-  $ runtests
-  0
+	>>> use Test::Doctest
+	>>> runtests
+	0
 
 =end
 
 =cut
 
 sub runtests {
-  my ($total, $success, @tests) = (0, 0);
-  my $test = Test::Builder->new;
+	my ($total, $success, @tests) = (0, 0);
+	my $test = Test::Builder->new;
 
-  for (@_) {
-    my $t = Test::Doctest->new;
-    $t->parse_from_file($_);
-    $total += @{$t->{tests}};
-    push @tests, $t;
-  }
+	foreach (@_) {
+		my $t = Test::Doctest->new;
+		$t->parse_from_file($_);
+		$total += @{$t->{tests}};
+		push @tests, $t;
+	}
 
-  if (!$test->has_plan) {
-    $test->plan(tests => $total);
-  }
+	$test->plan(tests => $total) unless $test->has_plan;
 
-  for (@tests) {
-    $success += $_->test == @{$_->{tests}}
-  }
+	foreach (@tests) {
+		$success += $_->test == @{$_->{tests}}
+	}
 
-  return $success;
+	return $success;
 }
 
 
@@ -103,20 +105,19 @@ sub run { runtests @ARGV }
 
 
 sub parse_from_file {
-  my $self = shift;
-  my $module = shift;
-  require $module;
-  open my $fh, '<', $module or die "Can't open $module: $!";
-  while (my $line = <$fh>) {
-    if ($line =~ /package\s+([\w:]+)/) {
-      $self->{module} = $1;
-	  # prevent loading it again by package name
-	  $INC{($1 =~ s(::)(/)gr) . '.pm'} = $INC{$module};
-      last;
-    }
-  }
-  close $fh;
-  return $self->SUPER::parse_from_file($module, devnull);
+	my $self = shift;
+	my $module = shift;
+	require $module;
+	my $path = $INC{$module};
+	open my $fh, '<', $path or die "Can't open $path: $!";
+	while (my $line = <$fh>) {
+		if ($line =~ /package\s+([\w:]+)/) {
+			$self->{package} = $1;
+			last;
+		}
+	}
+	close $fh;
+	return $self->SUPER::parse_from_file($path, devnull);
 }
 
 =head1 METHODS
@@ -129,26 +130,18 @@ B<Pod::Parser::new> when creating a new parser.
 
 =begin initialize
 
-  $ my $t = Test::Doctest->new
-  $ @{$t->{tests}}
-  0
-
-=end
-
-=begin custom prompt
-
-  $ my $t = Test::Doctest->new(prompt => 'abc')
-  $ $t->{prompt}
-  'abc'
+	>>> my $t = Test::Doctest->new
+	>>> @{$t->{tests}}
+	0
 
 =end
 
 =cut
 
 sub initialize {
-  my ($self) = @_;
-  $self->SUPER::initialize;
-  $self->{tests} = [];
+	my ($self) = @_;
+	$self->SUPER::initialize;
+	$self->{tests} = [];
 }
 
 =head2 B<command()>
@@ -158,18 +151,18 @@ current section which is used to name the tests.
 
 =begin command
 
-  $ my $t = Test::Doctest->new
-  $ $t->command('head1', "EXAMPLES\nthese are examples", 1)
-  $ $t->{name}
-  'EXAMPLES'
+	>>> my $t = Test::Doctest->new
+	>>> $t->command('head1', "EXAMPLES\nthese are examples", 1)
+	>>> $t->{name}
+	'EXAMPLES'
 
 =end
 
 =cut
 
 sub command {
-  my ($self, $cmd, $par, $line) = @_;
-  $self->{name} = (split /(?:\r|\n|\r\n)/, $par, 2)[0];
+	my ($self, $cmd, $par, $line) = @_;
+	$self->{name} = (split /(?:\r|\n|\r\n)/, $par, 2)[0];
 }
 
 =head2 B<textblock()>
@@ -178,9 +171,9 @@ Override B<Pod::Parser::textblock> to ignore normal blocks of pod text.
 
 =begin textblock
 
-  $ my $t = Test::Doctest->new
-  $ not defined $t->textblock
-  1
+	>>> my $t = Test::Doctest->new
+	>>> not defined $t->textblock
+	1
 
 =end
 
@@ -197,53 +190,48 @@ list of tests to be executed.
 
 =begin verbatim
 
-  $ my $t = Test::Doctest->new
-  $ $t->verbatim("  \$ 1+1\n  2", 1)
-  1
+	>>> my $t = Test::Doctest->new
+	>>> $t->verbatim(" >>> 1+1\n  2", 1)
+	1
 
 =end
 
 =begin verbatim no prompt
 
-  $ my $t = Test::Doctest->new
-  $ $t->verbatim("abc", 1)
-  0
-
-=end
-
-=begin verbatim custom prompt
-
-  $ my $t = Test::Doctest->new(prompt => '#\s+')
-  $ $t->verbatim("  # 1+1\n  2", 1)
-  1
+	>>> my $t = Test::Doctest->new
+	>>> $t->verbatim("abc", 1)
+	0
 
 =end
 
 =cut
 
 sub verbatim {
-  my ($self, $par, $line) = @_;
-  my $prompt = $self->{prompt} ? $self->{prompt} : '\$\s+';
-  my $name = $self->{name} ? $self->{name} : q{};
-  my @lines = split /(?:\r|\n|\r\n)/, $par;
-  my @code;
+	my ($self, $par, $line) = @_;
+	my $name = $self->{name} ? $self->{name} : q{};
 
-  for (@lines) {
-    if (/^\s+$prompt(.+)/) {
-      # capture code
-      push @code, $1;
-    } elsif (/^\s+(.+)/ and @code) {
-      # on first non-code line, with valid code accumlated
-      my $file = $self->input_file ? $self->input_file : 'stdin';
-      push @{$self->{tests}}, [$name, $file, $line, eval($1), @code];
-      @code = ();
-    } elsif (/^=cut/) {
-      # stop processing on =cut (even without a leading blank line)
-      last;
-    }
-  }
-
-  return @{$self->{tests}};
+	my @code;
+	my @lines = split /(?:\r|\n|\r\n)/, $par;
+	foreach (@lines) {
+		if (/^\s+>{3}\s*(.+)/) {
+			# capture code
+			push @code, $1;
+		}
+		elsif (/^\s\.{3}\s*(.+)/ && @code) {
+			# capture multiline code
+			$code[$#code] .= $1;
+		}
+		elsif (/^\s*(.+)/ && @code) {
+			# on first non-code line, with valid code accumlated
+			my $file = $self->input_file ? $self->input_file : 'stdin';
+			push @{$self->{tests}}, [$name, $file, $line, eval($1), @code];
+			@code = ();
+		} elsif (/^=cut/) {
+			# stop processing on =cut (even without a leading blank line)
+			last;
+		}
+	}
+	return @{$self->{tests}};
 }
 
 =head2 B<test()>
@@ -253,14 +241,14 @@ with the expected output using B<Test::Builder::is_eq>.
 
 =begin test
 
-  $ my $t = Test::Doctest->new
-  $ $t->test
-  0
+	>>> my $t = Test::Doctest->new
+	>>> $t->test
+	0
 
-  $ $t->command('begin', 'test', 1)
-  $ $t->verbatim("  \$ 1+1\n  2", 2)
-  $ @{$t->{tests}}
-  1
+	>>> $t->command('begin', 'test', 1)
+	>>> $t->verbatim(" >>> 1+1\n  2", 2)
+	>>> @{$t->{tests}}
+	1
 
 =end
 
@@ -271,48 +259,48 @@ our @group_result;
 
 
 sub test {
-  my ($self) = @_;
-  my $tests = $self->{tests};
+	my ($self) = @_;
+	my $tests = $self->{tests};
 
-  my $test = Test::Builder->new;
-  $test->plan(tests => scalar @$tests) unless $test->has_plan;
+	my $test = Test::Builder->new;
+	$test->plan(tests => scalar @$tests) unless $test->has_plan;
 
-  my (@grouped, $current_group);
-  foreach (@$tests) {
-    if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
-      push(@grouped, $current_group = []);
-    }
-    push(@$current_group, $_);
-  }
+	my (@grouped, $current_group);
+	foreach (@$tests) {
+	    if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
+			push(@grouped, $current_group = []);
+	    }
+	    push(@$current_group, $_);
+	  }
 
-  my $run = 0;
-  foreach my $group (@grouped) {
-    my @group_code;
-    unshift(@group_code, "package $self->{module}") if $self->{module};
-    my @group_expect;
-    my $subtest = 0;
-    foreach (@$group) {
-      my ($name, $file, $line, $expect, @code) = @$_;
-      push(@group_expect, [$name, $file, $line, $expect]);
-      my $result_line = pop(@code);
-      push(@group_code, @code);
-      push(@group_code, "\$Test::Doctest::group_result[$subtest] = $result_line");
-      $subtest++;
-    }
+	my $run = 0;
+	foreach my $group (@grouped) {
+		my @group_code;
+	    unshift(@group_code, "package $self->{package}") if $self->{package};
+	    my @group_expect;
+	    my $subtest = 0;
+	    foreach (@$group) {
+			my ($name, $file, $line, $expect, @code) = @$_;
+			push(@group_expect, [$name, $file, $line, $expect]);
+			my $result_line = pop(@code);
+			push(@group_code, @code);
+			push(@group_code, "\$Test::Doctest::group_result[$subtest] = $result_line");
+			$subtest++;
+	    }
 
-    eval join(";", @group_code);
-    croak $@ if $@;
+	    eval join(";", @group_code);
+	    croak $@ if $@;
 
-    for (my $i = 0; $i < @group_expect; $i++) {
-      my ($name, $file, $line, $expect) = @{$group_expect[$i]};
-      my $outof = @group_expect > 1 ? sprintf("%d/%d", $i + 1, scalar @group_expect) : q();
-      $test->is_eq($group_result[$i], $expect, "$name $outof ($file, $line)");
-    }
+	    for (my $i = 0; $i < @group_expect; $i++) {
+			my ($name, $file, $line, $expect) = @{$group_expect[$i]};
+			my $outof = @group_expect > 1 ? sprintf("%d/%d", $i + 1, scalar @group_expect) : q();
+			$test->is_eq($group_result[$i], $expect, "$name $outof ($file, $line)");
+	    }
 
-    $run += $subtest;
-  }
+		$run += $subtest;
+	}
 
-  return $run;
+	return $run;
 }
 
 1;

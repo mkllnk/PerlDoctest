@@ -1,58 +1,67 @@
-package Some::Namespace::Example;
+package Test::Doctest::Example;
 
+use 5.014;
 use strict;
 use warnings;
 
 # You can test this module from the command line:
-# > perl -MTest::Doctest -e run Example.pm
+# $ perl -MTest::Doctest -e run Test/Doctest/Example.pm
 
 =head1 Example
 
 =head2 This is only an example.
 
-  $ 1 + 1
-  2
+	>>> 1 + 1
+	2
 
 =head2 Checked values are perl expressons.
 
-  $ 'foo'
-  'foo'
+	>>> 'foo'
+	'foo'
 
-  $ undef
-  undef
+	>>> undef
+	undef
+
+=head2 Multiline statements are supported
+
+	>>> 1 + (
+	...		4 + 5
+	... )
+	10
 
 =head2 Variables that were localized inside pod block...
 
-  $ my $foo = 10
-  10
+	>>> my $foo = 10
+	10
 
 ...are local to the end of the block.
 
-  $ $foo *= 2
-  20
+	>>> $foo *= 2
+	20
 
 =head2 Variables that were localized inside pod block...
 
 ...and to the end of consequent blocks with the same name.
 
-  $ $foo *= 2
-  40
+	>>> $foo *= 2
+	40
 
 =head2 But no longer.
 
-  $ no strict 'vars'
-  $ $foo
-  undef
+	>>> no strict 'vars'
+	>>> $foo
+	undef
 
 =head2 Tests are being run in the package namespace, so you can easily call subs.
 
-  $ foo()
-  5
+	>>> foo()
+	5
 
 =cut
 
 sub foo {
-  return 5;
+	return 5;
 }
+
 
 1;
