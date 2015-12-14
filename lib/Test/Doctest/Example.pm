@@ -22,7 +22,12 @@ use warnings;
 	>>> undef
 	undef
 
-=head2 Multiline statements are supported
+=head2 They are compared in a deep manner.
+
+	>>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
+	[1, 2, 3, {bar => 'foo', foo => 'bar'}]
+
+=head2 Multiline statements are supported.
 
 	>>> 1 + (
 	...		4 + 5

@@ -80,9 +80,10 @@ Extract and run tests from pod for each file argument.
 
 =cut
 
+
 sub runtests {
 	my ($total, $success, @tests) = (0, 0);
-	my $test = Test::Builder->new;
+	my $test = Test::Doctest::Builder->new;
 
 	foreach (@_) {
 		my $t = Test::Doctest->new;
@@ -258,11 +259,32 @@ with the expected output using B<Test::Builder::is_eq>.
 our @group_result;
 
 
+package Test::Doctest::Builder {
+	use Test::Deep::NoTest qw(cmp_details deep_diag);
+
+	use base 'Test::Builder';
+
+	our $Test;
+	sub new { $Test ||= shift->create }
+
+	sub is_eq {
+		my $self = shift;
+		my ($got, $expected, $test_name) = @_;
+		if (ref $expected) {
+			my ($ok, $stack) = cmp_details($got, $expected);
+			$self->diag(deep_diag($stack)) unless $self->ok($ok, $test_name);
+			return;
+		}
+		$self->SUPER::is_eq(@_);
+	}
+}
+
+
 sub test {
 	my ($self) = @_;
 	my $tests = $self->{tests};
 
-	my $test = Test::Builder->new;
+	my $test = Test::Doctest::Builder->new;
 	$test->plan(tests => scalar @$tests) unless $test->has_plan;
 
 	my (@grouped, $current_group);
@@ -271,7 +293,7 @@ sub test {
 			push(@grouped, $current_group = []);
 	    }
 	    push(@$current_group, $_);
-	  }
+	}
 
 	my $run = 0;
 	foreach my $group (@grouped) {
