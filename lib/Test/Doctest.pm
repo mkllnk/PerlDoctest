@@ -214,7 +214,7 @@ sub verbatim {
 	my @code;
 	my @lines = split /(?:\r|\n|\r\n)/, $par;
 	foreach (@lines) {
-		if (/^\s+>{3}\s*(.+)/) {
+		if (/^\s+(?:>{3}|\$)\s*(.+)/) {
 			# capture code
 			push @code, $1;
 		}

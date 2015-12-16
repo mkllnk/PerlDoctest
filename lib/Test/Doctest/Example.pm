@@ -29,10 +29,16 @@ use warnings;
 
 =head2 Multiline statements are supported.
 
-	>>> 1 + (
+	>>> 90 / (
 	...		4 + 5
 	... )
 	10
+
+
+=head2 Original Test::Doctest one-line statements are supported too.
+
+	$ 1 + 1
+	2
 
 =head2 Variables that were localized inside pod block...
 
