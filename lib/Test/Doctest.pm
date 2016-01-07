@@ -218,16 +218,17 @@ sub verbatim {
 			# capture code
 			push @code, $1;
 		}
-		elsif (/^\s\.{3}\s*(.+)/ && @code) {
+		elsif (/^\s+\.{3}\s*(.+)/ && @code) {
 			# capture multiline code
 			$code[$#code] .= $1;
 		}
 		elsif (/^\s*(.+)/ && @code) {
 			# on first non-code line, with valid code accumlated
 			my $file = $self->input_file ? $self->input_file : 'stdin';
-			push @{$self->{tests}}, [$name, $file, $line, eval($1), @code];
+			push @{$self->{tests}}, [$name, $file, $line, scalar eval($1), @code];
 			@code = ();
-		} elsif (/^=cut/) {
+		}
+        elsif (/^=cut/) {
 			# stop processing on =cut (even without a leading blank line)
 			last;
 		}
