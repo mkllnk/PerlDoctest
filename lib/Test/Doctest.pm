@@ -239,8 +239,9 @@ sub verbatim {
 
     foreach (@tests) {
         # on first non-code line, with valid code accumlated
-        my $expect = join('', @{$_->{expect}});
-        push @{$self->{tests}}, [$name, $file, $line, scalar eval($expect), @{$_->{code}}];
+        my $expect = eval(join('', @{$_->{expect}}));
+        die "$@\t$file, line $line"  if $@;
+        push @{$self->{tests}}, [$name, $file, $line, $expect, @{$_->{code}}];
     }
 
 	return @{$self->{tests}};
