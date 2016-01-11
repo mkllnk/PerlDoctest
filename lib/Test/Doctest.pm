@@ -210,29 +210,39 @@ list of tests to be executed.
 sub verbatim {
 	my ($self, $par, $line) = @_;
 	my $name = $self->{name} ? $self->{name} : q{};
+    my $file = $self->input_file ? $self->input_file : 'stdin';
 
-	my @code;
 	my @lines = split /(?:\r|\n|\r\n)/, $par;
+
+    my (@tests, $code, $expect);
 	foreach (@lines) {
-		if (/^\s+(?:>{3}|\$)\s*(.+)/) {
+		if (/^\s+(>{3}|\.{3}|\$)\s+(.+)/ && ($1 ne '...' || $code && @$code)) {
+            if (!defined $expect || @$expect) {
+                push(@tests, {
+                    code   => $code   = [],
+                    expect => $expect = []
+                });
+            }
 			# capture code
-			push @code, $1;
-		}
-		elsif (/^\s+\.{3}\s*(.+)/ && @code) {
-			# capture multiline code
-			$code[$#code] .= $1;
-		}
-		elsif (/^\s*(.+)/ && @code) {
-			# on first non-code line, with valid code accumlated
-			my $file = $self->input_file ? $self->input_file : 'stdin';
-			push @{$self->{tests}}, [$name, $file, $line, scalar eval($1), @code];
-			@code = ();
-		}
-        elsif (/^=cut/) {
-			# stop processing on =cut (even without a leading blank line)
-			last;
+            if ($1 eq '...') {
+    			# capture multiline code
+                $code->[$#$code] .= $2;
+            }
+            else {
+    			push @$code, $2;
+            }
+        }
+		elsif (/^\s*(.+)/ && $code && @$code) {
+            push(@$expect, $1);
 		}
 	}
+
+    foreach (@tests) {
+        # on first non-code line, with valid code accumlated
+        my $expect = join('', @{$_->{expect}});
+        push @{$self->{tests}}, [$name, $file, $line, scalar eval($expect), @{$_->{code}}];
+    }
+
 	return @{$self->{tests}};
 }
 

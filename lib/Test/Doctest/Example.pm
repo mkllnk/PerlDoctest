@@ -18,11 +18,10 @@ use warnings;
 
 	>>> 'foo'
 	'foo'
-
 	>>> undef
 	undef
 
-=head2 They are compared in a deep manner.
+=head2 They are compared in deep manner.
 
 	>>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
 	[1, 2, 3, {bar => 'foo', foo => 'bar'}]
@@ -34,6 +33,13 @@ use warnings;
 	... )
 	10
 
+=head2 Result could also be multiline
+
+    >>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
+    [
+            1, 2, 3,
+            {bar => 'foo', foo => 'bar'}
+    ]
 
 =head2 Original Test::Doctest one-line statements are supported too.
 
