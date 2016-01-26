@@ -5,9 +5,6 @@ use warnings;
 use strict;
 use Data::Dumper 'Dumper';
 
-require Exporter;
-require Pod::Parser;
-
 use parent 'Exporter';
 use parent 'Pod::Parser';
 
@@ -268,9 +265,6 @@ with the expected output using B<Test::Builder::is_eq>.
 =cut
 
 
-our @group_result;
-
-
 package Test::Doctest::Builder {
 	use Test::Deep::NoTest qw(cmp_details deep_diag);
 
@@ -292,6 +286,9 @@ package Test::Doctest::Builder {
 }
 
 
+our ($Result, $Check);
+
+
 sub test {
 	my ($self) = @_;
 	my $tests = $self->{tests};
@@ -309,29 +306,25 @@ sub test {
 
 	my $run = 0;
 	foreach my $group (@grouped) {
-		my @group_code;
-	    unshift(@group_code, "package $self->{package}") if $self->{package};
-	    my @group_expect;
-	    my $subtest = 0;
-	    foreach (@$group) {
-			my ($name, $file, $line, $expect, @code) = @$_;
-			push(@group_expect, [$name, $file, $line, $expect]);
+		my (@group_code, @checks);
+	    push(@group_code, "package $self->{package}") if $self->{package};
+        for (my $i = 0; $i <= $#$group; $i++) {
+			my ($name, $file, $line, $expect, @code) = @{$group->[$i]};
+            my $outof = $#$group > 0 ? sprintf("%d/%d", $i + 1, $#$group + 1) : q();
+            my $test_name = "$name $outof ($file, $line)";
+            push(@checks, sub { $test->is_eq($Result, $expect, $test_name) });
 			my $result_line = pop(@code);
-			push(@group_code, @code);
-			push(@group_code, "\$Test::Doctest::group_result[$subtest] = $result_line");
-			$subtest++;
+			push(
+                @group_code,
+                @code,
+                "\$Test::Doctest::Result = $result_line",
+                "\$Test::Doctest::Check->()"
+            );
 	    }
-
+        local $Check = sub { shift(@checks)->() };
 	    eval join(";", @group_code);
 	    croak $@ if $@;
-
-	    for (my $i = 0; $i < @group_expect; $i++) {
-			my ($name, $file, $line, $expect) = @{$group_expect[$i]};
-			my $outof = @group_expect > 1 ? sprintf("%d/%d", $i + 1, scalar @group_expect) : q();
-			$test->is_eq($group_result[$i], $expect, "$name $outof ($file, $line)");
-	    }
-
-		$run += $subtest;
+		$run += @$group;
 	}
 
 	return $run;

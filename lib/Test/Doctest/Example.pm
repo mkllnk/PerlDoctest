@@ -12,7 +12,7 @@ use warnings;
 =head2 This is only an example.
 
 	>>> 1 + 1
-	2
+    2
 
 =head2 Checked values are perl expressons.
 
@@ -81,6 +81,16 @@ use warnings;
 
 	>>> foo()
 	5
+
+=head2 Changing result doesn't break testing
+
+    >>> my $a = [1, 2, 3]
+    >>> $a
+    [1, 2, 3]
+
+    >>> push(@$a, 4)
+    >>> $a
+    [1, 2, 3, 4]
 
 =cut
 
