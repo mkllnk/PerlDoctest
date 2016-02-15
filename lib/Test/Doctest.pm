@@ -14,6 +14,8 @@ our @EXPORT = qw(run runtests);
 use Carp;
 use Test::Builder;
 use File::Spec::Functions 'devnull';
+use Module::Metadata;
+
 
 =head1 NAME
 
@@ -92,7 +94,7 @@ sub runtests {
 	$test->plan(tests => $total) unless $test->has_plan;
 
 	foreach (@tests) {
-		$success += $_->test == @{$_->{tests}}
+		$success += $_->test == @{$_->{tests}};
 	}
 
 	return $success;
@@ -105,17 +107,11 @@ sub run { runtests @ARGV }
 sub parse_from_file {
 	my $self = shift;
 	my $module = shift;
+    $module = ($module =~ s{::}{/}gr) . '.pm' unless $module =~ /\.pm$/;
 	require $module;
-	my $path = $INC{$module};
-	open my $fh, '<', $path or die "Can't open $path: $!";
-	while (my $line = <$fh>) {
-		if ($line =~ /package\s+([\w:]+)/) {
-			$self->{package} = $1;
-			last;
-		}
-	}
-	close $fh;
-	return $self->SUPER::parse_from_file($path, devnull);
+	my $info = Module::Metadata->new_from_module($module);
+    $self->{package} = $info->{packages}->[0] if @{$info->{packages}};
+	return $self->SUPER::parse_from_file($info->{filename}, devnull);
 }
 
 =head1 METHODS
