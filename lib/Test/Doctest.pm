@@ -1,6 +1,6 @@
 package Test::Doctest;
 
-use 5.014;
+use 5.005;
 use warnings;
 use strict;
 use Data::Dumper 'Dumper';
@@ -107,10 +107,10 @@ sub run { runtests @ARGV }
 sub parse_from_file {
 	my $self = shift;
 	my $module = shift;
-    $module = ($module =~ s{::}{/}gr) . '.pm' unless $module =~ /\.pm$/;
+	$module = ($module =~ s{::}{/}gr) . '.pm' unless $module =~ /\.pm$/;
 	require $module;
 	my $info = Module::Metadata->new_from_module($module);
-    $self->{package} = $info->{packages}->[0] if @{$info->{packages}};
+	$self->{package} = $info->{packages}->[0] if @{$info->{packages}};
 	return $self->SUPER::parse_from_file($info->{filename}, devnull);
 }
 
@@ -203,39 +203,39 @@ list of tests to be executed.
 sub verbatim {
 	my ($self, $par, $line) = @_;
 	my $name = $self->{name} ? $self->{name} : q{};
-    my $file = $self->input_file ? $self->input_file : 'stdin';
+	my $file = $self->input_file ? $self->input_file : 'stdin';
 
 	my @lines = split /(?:\r|\n|\r\n)/, $par;
 
-    my (@tests, $code, $expect);
+	my (@tests, $code, $expect);
 	foreach (@lines) {
 		if (/^\s+(>{3}|\.{3}|\$)\s+(.+)/ && ($1 ne '...' || $code && @$code)) {
-            if (!defined $expect || @$expect) {
-                push(@tests, {
-                    code   => $code   = [],
-                    expect => $expect = []
-                });
-            }
+			if (!defined $expect || @$expect) {
+				push(@tests, {
+					code   => $code	  = [],
+					expect => $expect = []
+				});
+			}
 			# capture code
-            if ($1 eq '...') {
-    			# capture multiline code
-                $code->[$#$code] .= $2;
-            }
-            else {
-    			push @$code, $2;
-            }
-        }
+			if ($1 eq '...') {
+				# capture multiline code
+				$code->[$#$code] .= $2;
+			}
+			else {
+				push @$code, $2;
+			}
+		}
 		elsif (/^\s*(.+)/ && $code && @$code) {
-            push(@$expect, $1);
+			push(@$expect, $1);
 		}
 	}
 
-    foreach (@tests) {
-        # on first non-code line, with valid code accumlated
-        my $expect = eval(join('', @{$_->{expect}}));
-        die "$@\t$file, line $line"  if $@;
-        push @{$self->{tests}}, [$name, $file, $line, $expect, @{$_->{code}}];
-    }
+	foreach (@tests) {
+		# on first non-code line, with valid code accumlated
+		my $expect = eval(join('', @{$_->{expect}}));
+		die "$@\t$file, line $line"	 if $@;
+		push @{$self->{tests}}, [$name, $file, $line, $expect, @{$_->{code}}];
+	}
 
 	return @{$self->{tests}};
 }
@@ -294,32 +294,32 @@ sub test {
 
 	my (@grouped, $current_group);
 	foreach (@$tests) {
-	    if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
+		if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
 			push(@grouped, $current_group = []);
-	    }
-	    push(@$current_group, $_);
+		}
+		push(@$current_group, $_);
 	}
 
 	my $run = 0;
 	foreach my $group (@grouped) {
 		my (@group_code, @checks);
-	    push(@group_code, "package $self->{package}") if $self->{package};
-        for (my $i = 0; $i <= $#$group; $i++) {
+		push(@group_code, "package $self->{package}") if $self->{package};
+		for (my $i = 0; $i <= $#$group; $i++) {
 			my ($name, $file, $line, $expect, @code) = @{$group->[$i]};
-            my $outof = $#$group > 0 ? sprintf("%d/%d", $i + 1, $#$group + 1) : q();
-            my $test_name = "$name $outof ($file, $line)";
-            push(@checks, sub { $test->is_eq($Result, $expect, $test_name) });
+			my $outof = $#$group > 0 ? sprintf("%d/%d", $i + 1, $#$group + 1) : q();
+			my $test_name = "$name $outof ($file, $line)";
+			push(@checks, sub { $test->is_eq($Result, $expect, $test_name) });
 			my $result_line = pop(@code);
 			push(
-                @group_code,
-                @code,
-                "\$Test::Doctest::Result = $result_line",
-                "\$Test::Doctest::Check->()"
-            );
-	    }
-        local $Check = sub { shift(@checks)->() };
-	    eval join(";", @group_code);
-	    croak $@ if $@;
+				@group_code,
+				@code,
+				"\$Test::Doctest::Result = $result_line",
+				"\$Test::Doctest::Check->()"
+			);
+		}
+		local $Check = sub { shift(@checks)->() };
+		eval join(";", @group_code);
+		croak $@ if $@;
 		$run += @$group;
 	}
 

@@ -12,7 +12,7 @@ use warnings;
 =head2 This is only an example.
 
 	>>> 1 + 1
-    2
+	2
 
 =head2 Checked values are perl expressons.
 
@@ -35,19 +35,19 @@ use warnings;
 
 =head2 Result could also be multiline
 
-    >>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
-    [
-            1, 2, 3,
-            {bar => 'foo', foo => 'bar'}
-    ]
+	>>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
+	[
+			1, 2, 3,
+			{bar => 'foo', foo => 'bar'}
+	]
 
 =head2 Test::Deep helpers work
 
-    >>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
-    [1, 2, 3, Test::Deep::ignore]
+	>>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
+	[1, 2, 3, Test::Deep::ignore]
 
-    >>> [1, 2, 3]
-    Test::Deep::bag(3, 1, 2)
+	>>> [1, 2, 3]
+	Test::Deep::bag(3, 1, 2)
 
 =head2 Original Test::Doctest one-line statements are supported too.
 
@@ -84,13 +84,13 @@ use warnings;
 
 =head2 Changing result doesn't break testing
 
-    >>> my $a = [1, 2, 3]
-    >>> $a
-    [1, 2, 3]
+	>>> my $a = [1, 2, 3]
+	>>> $a
+	[1, 2, 3]
 
-    >>> push(@$a, 4)
-    >>> $a
-    [1, 2, 3, 4]
+	>>> push(@$a, 4)
+	>>> $a
+	[1, 2, 3, 4]
 
 =cut
 
