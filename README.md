@@ -37,7 +37,16 @@ Running
 
 There are three ways to run it. The first is directly from the command line. But you have to specify the module to test, in this example the module is named 'Example'.
 
-    perl -MTest::Doctest -e run Example.pm
+```sh
+perl -MTest::Doctest -e run Example.pm
+```
+
+It might be convenient to define an alias. And you can use package names as well:
+
+```sh
+alias perldoctest='perl -MTest::Doctest -e run'
+perldoctest Some::Other::Example
+```
 
 Or you can write your custom test script.
 
@@ -45,9 +54,10 @@ Or you can write your custom test script.
 use Test::Doctest;
 runtests($filepath);
 ```
-You can also specify a file handle.
+
+The last method is your own test script specifing a file handle.
+
 ```perl
-# or
 use Test::Doctest;
 my $p = Test::Doctest->new;
 $p->parse_from_filehandle(\*STDIN);
@@ -55,7 +65,7 @@ $p->test;
 ```
 
 Further documentation is contained in the [code][3] itself.
-This module was written by [Bryan Cardillo][4] and published under the same terms as Perl itself.
+This module was originally written by [Bryan Cardillo][4] and published under the same terms as Perl itself.
 
 [1]: http://docs.python.org/2/library/doctest.html
 [2]: http://perldoc.perl.org/perlpod.html

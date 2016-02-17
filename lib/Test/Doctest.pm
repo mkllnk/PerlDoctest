@@ -340,6 +340,10 @@ __END__
 
 Original version
 
+=item 0.02
+
+Further development by Andrei Fyodorov: testing in module namespace, expected values as perl literals, deep compare and more
+
 =back
 
 =head1 SEE ALSO
@@ -353,6 +357,7 @@ B<Test::Builder> is used to plan the tests and determine the results.
 =head1 AUTHOR
 
 Bryan Cardillo E<lt>dillo@cpan.org<gt>
+Andrei Fyodorov E<lt>sour-times@yandex.ru<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
