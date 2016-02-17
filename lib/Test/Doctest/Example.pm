@@ -1,6 +1,6 @@
 package Test::Doctest::Example;
 
-use 5.014;
+use 5.005;
 use strict;
 use warnings;
 

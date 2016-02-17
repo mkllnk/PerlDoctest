@@ -1,6 +1,6 @@
 language: perl
 perl:
-  - "5.12"
+  - "5.14"
 
 install:
   - cpanm Test::More -v --notest

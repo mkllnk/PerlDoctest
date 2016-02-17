@@ -1,6 +1,6 @@
 package Test::Doctest;
 
-use 5.005;
+use 5.014;
 use warnings;
 use strict;
 use Data::Dumper 'Dumper';
