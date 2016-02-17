@@ -10,8 +10,8 @@ Your code comment could look like this:
 ```perl
 =head1 Addition in Perl is simple
 
-	$ 2 + 3
-	5
+    $ 2 + 3
+    5
 
 =cut
 ```
@@ -23,10 +23,10 @@ Or it could look like this:
 ```perl
 =head1
 
-	>>> get_vegetables(
-	...		color => 'green'
-	... )
-	Test::Deep::bag(qw(broccoli cucumber cabbage zucchini))
+    >>> get_vegetables(
+    ...     color => 'green'
+    ... )
+    Test::Deep::bag(qw(broccoli cucumber cabbage zucchini))
 
 =cut
 ```
@@ -37,7 +37,7 @@ Running
 
 There are three ways to run it. The first is directly from the command line. But you have to specify the module to test, in this example the module is named 'Example'.
 
-	perl -MTest::Doctest -e run Example.pm
+    perl -MTest::Doctest -e run Example.pm
 
 Or you can write your custom test script.
 
