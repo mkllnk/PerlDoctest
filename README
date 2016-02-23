@@ -1,0 +1,22 @@
+Test-Doctest
+
+Doctest verifies your documentation and your code at the same time.
+By executing usage examples in your documenation it validates that your
+documentation is up-to-date and that your code is behaving like documented.
+
+The principle comes from the python community. Python's doctest executes
+examples in so called docstrings. In perl the usage examples are found in pod.
+
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+SUPPORT AND DOCUMENTATION
+
+Further documentation is contained in the code itself.
