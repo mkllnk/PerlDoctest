@@ -22,7 +22,11 @@ Test::Doctest - extract and evaluate tests from pod fragments
 
 =head1 SYNOPSIS
 
-perl -MTest::Doctest -e run lib/Some/Module.pm
+    perl -Ilib -MTest::Doctest -e run Some/Module.pm
+
+    - or -
+
+    perl -Ilib -MTest::Doctest -e run Some::Module
 
     - or -
 
@@ -38,7 +42,7 @@ perl -MTest::Doctest -e run lib/Some/Module.pm
 
 =head1 DESCRIPTION
 
-B<runtests> uses B<Pod::Parser> to extract pod text from the files
+B<run> and B<runtests> uses B<Pod::Parser> to extract pod text from the files
 specified, evaluates each line begining with a prompt (>>>),
 and finally compares the results with the expected output using
 B<is_eq> from B<Test::Builder>.
@@ -62,7 +66,13 @@ B<is_eq> from B<Test::Builder>.
     >>> $a *= 2
     20
 
+See more examples in L<Test::Doctest::Example>.
+
 =head1 EXPORTS
+
+=head2 B<run()>
+
+Extract and run tests from pod for each file in @ARGV.
 
 =head2 B<runtests()>
 
@@ -74,7 +84,7 @@ Extract and run tests from pod for each file argument.
     >>> runtests
     0
 
-=end
+=end runtests
 
 =cut
 
@@ -124,7 +134,7 @@ B<Pod::Parser::new> when creating a new parser.
     >>> @{$t->{tests}}
     0
 
-=end
+=end initialize
 
 =cut
 
@@ -146,7 +156,7 @@ current section which is used to name the tests.
     >>> $t->{name}
     'EXAMPLES'
 
-=end
+=end command
 
 =cut
 
@@ -165,7 +175,7 @@ Override B<Pod::Parser::textblock> to ignore normal blocks of pod text.
     >>> not defined $t->textblock
     1
 
-=end
+=end textblock
 
 =cut
 
@@ -184,7 +194,7 @@ list of tests to be executed.
     >>> $t->verbatim(" >>> 1+1\n  2", 1)
     1
 
-=end
+=end verbatim
 
 =begin verbatim no prompt
 
@@ -192,7 +202,7 @@ list of tests to be executed.
     >>> $t->verbatim("abc", 1)
     0
 
-=end
+=end verbatim
 
 =cut
 
@@ -261,7 +271,7 @@ with the expected output using B<Test::Builder::is_eq>.
     >>> @{$t->{tests}}
     1
 
-=end
+=end test
 
 =cut
 
@@ -342,7 +352,8 @@ Original version
 
 =item 0.02
 
-Further development by Andrei Fyodorov: testing in module namespace, expected values as perl literals, deep compare and more
+Further development by Andrei Fyodorov: testing in module namespace,
+expected values as perl literals, deep compare and more
 
 =back
 
@@ -356,8 +367,9 @@ B<Test::Builder> is used to plan the tests and determine the results.
 
 =head1 AUTHOR
 
-Bryan Cardillo E<lt>dillo@cpan.org<gt>
-Andrei Fyodorov E<lt>sour-times@yandex.ru<gt>
+Bryan Cardillo E<lt>dillo@cpan.orgE<gt>
+
+Andrei Fyodorov E<lt>afyodorov@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
