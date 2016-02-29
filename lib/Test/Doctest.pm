@@ -342,21 +342,6 @@ sub test {
 
 __END__
 
-=head1 HISTORY
-
-=over 8
-
-=item 0.01
-
-Original version
-
-=item 0.02
-
-Further development by Andrei Fyodorov: testing in module namespace,
-expected values as perl literals, deep compare and more
-
-=back
-
 =head1 SEE ALSO
 
 L<Pod::Parser>, L<Test::Builder>
