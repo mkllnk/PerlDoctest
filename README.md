@@ -2,7 +2,7 @@ Doctests for Perl
 =================
 
 Doctest verifies your documentation and your code at the same time.
-By executing usage examples in your documenation it validates that your documentation is up-to-date and that your code is behaving like documented.
+By executing usage examples in your documentation it validates that your documentation is up-to-date and that your code is behaving like documented.
 
 The principle comes from the python community. [Python's doctest][1] executes examples in so called docstrings. In perl the usage examples are found in [pod][2].
 Your code comment could look like this:
@@ -10,7 +10,7 @@ Your code comment could look like this:
 ```perl
 =head1 Addition in Perl is simple
 
-    $ 2 + 3
+    >>> 2 + 3
     5
 
 =cut
@@ -59,9 +59,9 @@ The last method is your own test script specifing a file handle.
 
 ```perl
 use Test::Doctest;
-my $p = Test::Doctest->new;
+my $p = Test::Doctest->new();
 $p->parse_from_filehandle(\*STDIN);
-$p->test;
+$p->test();
 ```
 
 Further documentation is contained in the [code][3] itself.
