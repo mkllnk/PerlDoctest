@@ -1,0 +1,173 @@
+=head1 NAME
+
+Test::Doctest - extract and evaluate tests from pod fragments
+
+=head1 SYNOPSIS
+
+    perl -Ilib -MTest::Doctest -e run Some/Module.pm
+
+    - or -
+
+    perl -Ilib -MTest::Doctest -e run Some::Module
+
+    - or -
+
+    use Test::Doctest;
+    runtests($filepath);
+
+    - or -
+
+    use Test::Doctest;
+    my $p = Test::Doctest->new;
+    $p->parse_from_filehandle(\*STDIN);
+    $p->test;
+
+=head1 DESCRIPTION
+
+B<run> and B<runtests> uses B<Pod::Parser> to extract pod text from the files
+specified, evaluates each line begining with a prompt (>>>),
+and finally compares the results with the expected output using
+B<is_eq> from B<Test::Builder>.
+
+=head1 EXAMPLES
+
+    >>> 1 + 1
+    2
+
+    >>> my @a = qw(2 3 4)
+    3
+
+    >>> use Pod::Parser;
+    >>> my $p = Pod::Parser->new;
+    >>> ref $p;
+    'Pod::Parser'
+
+    >>> $a = 10
+    10
+
+    >>> $a *= 2
+    20
+
+See more examples in L<Test::Doctest::Example>.
+
+=head1 EXPORTS
+
+=head2 B<run()>
+
+Extract and run tests from pod for each file in @ARGV.
+
+=head2 B<runtests()>
+
+Extract and run tests from pod for each file argument.
+
+=begin runtests
+
+    >>> use Test::Doctest
+    >>> runtests
+    0
+
+=end runtests
+
+=head1 METHODS
+
+=head2 B<initialize()>
+
+Initialize this B<Test::Doctest> pod parser. This method is
+not typically called directly, but rather, is called by
+B<Pod::Parser::new> when creating a new parser.
+
+=begin initialize
+
+    >>> my $t = Test::Doctest->new
+    >>> @{$t->{tests}}
+    0
+
+=end initialize
+
+=head2 B<command()>
+
+Override B<Pod::Parser::command> to save the name of the
+current section which is used to name the tests.
+
+=begin command
+
+    >>> my $t = Test::Doctest->new
+    >>> $t->command('head1', "EXAMPLES\nthese are examples", 1)
+    >>> $t->{name}
+    'EXAMPLES'
+
+=end command
+
+=head2 B<textblock()>
+
+Override B<Pod::Parser::textblock> to ignore normal blocks of pod text.
+
+=begin textblock
+
+    >>> my $t = Test::Doctest->new
+    >>> not defined $t->textblock
+    1
+
+=end textblock
+
+=head2 B<verbatim()>
+
+Override B<Pod::Parser::verbatim> to search verbatim paragraphs for
+doctest code blocks.  Each block found, along with information about
+its location in the file and its expected output is appended to the
+list of tests to be executed.
+
+=begin verbatim
+
+    >>> my $t = Test::Doctest->new
+    >>> $t->verbatim(" >>> 1+1\n  2", 1)
+    1
+
+=end verbatim
+
+=begin verbatim no prompt
+
+    >>> my $t = Test::Doctest->new
+    >>> $t->verbatim("abc", 1)
+    0
+
+=end verbatim
+
+=head2 B<test()>
+
+Evaluates each test discovered via parsing and compares the results
+with the expected output using B<Test::Builder::is_eq>.
+
+=begin test
+
+    >>> my $t = Test::Doctest->new
+    >>> $t->test
+    0
+
+    >>> $t->command('begin', 'test', 1)
+    >>> $t->verbatim(" >>> 1+1\n  2", 2)
+    >>> @{$t->{tests}}
+    1
+
+=end test
+
+=head1 SEE ALSO
+
+L<Pod::Parser>, L<Test::Builder>
+
+B<Pod::Parser> defines the parser interface used to extract the tests.
+
+B<Test::Builder> is used to plan the tests and determine the results.
+
+=head1 AUTHOR
+
+Bryan Cardillo E<lt>dillo@cpan.orgE<gt>
+
+Andrei Fyodorov E<lt>afyodorov@cpan.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2009 by Bryan Cardillo
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
