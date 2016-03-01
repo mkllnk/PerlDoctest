@@ -8,6 +8,6 @@ use Data::Dumper 'Dumper';
 use Test::Doctest;
 
 runtests qw(
-  Test/Doctest.pm
-  Test/Doctest/Example.pm
+    Test/Doctest.pm
+    Test/Doctest/Example.pm
 );
