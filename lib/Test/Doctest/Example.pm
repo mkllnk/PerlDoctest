@@ -44,10 +44,10 @@ use warnings;
 =head2 Test::Deep helpers work
 
     >>> [1, 2, 3, {foo => 'bar', bar => 'foo'}]
-    [1, 2, 3, Test::Deep::ignore]
+    [1, 2, 3, ignore]
 
     >>> [1, 2, 3]
-    Test::Deep::bag(3, 1, 2)
+    bag(3, 1, 2)
 
 =head2 Original Test::Doctest one-line statements are supported too.
 
