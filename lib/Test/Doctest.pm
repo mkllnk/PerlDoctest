@@ -89,20 +89,20 @@ Extract and run tests from pod for each file argument.
 =cut
 
 sub runtests {
-    my ( $total, $success, @tests ) = ( 0, 0 );
+    my ($total, $success, @tests) = (0, 0);
     my $test = Test::Doctest::Builder->new;
 
     foreach (@_) {
         my $t = Test::Doctest->new;
         $t->parse_from_file($_);
-        $total += @{ $t->{tests} };
+        $total += @{$t->{tests}};
         push @tests, $t;
     }
 
-    $test->plan( tests => $total ) unless $test->has_plan;
+    $test->plan(tests => $total) unless $test->has_plan;
 
     foreach (@tests) {
-        $success += $_->test == @{ $_->{tests} };
+        $success += $_->test == @{$_->{tests}};
     }
 
     return $success;
@@ -113,11 +113,11 @@ sub run { runtests @ARGV }
 sub parse_from_file {
     my $self   = shift;
     my $module = shift;
-    $module = ( $module =~ s{::}{/}gr ) . '.pm' unless $module =~ /\.pm$/;
+    $module = ($module =~ s{::}{/}gr) . '.pm' unless $module =~ /\.pm$/;
     require $module;
     my $info = Module::Metadata->new_from_module($module);
-    $self->{package} = $info->{packages}->[0] if @{ $info->{packages} };
-    return $self->SUPER::parse_from_file( $info->{filename}, devnull );
+    $self->{package} = $info->{packages}->[0] if @{$info->{packages}};
+    return $self->SUPER::parse_from_file($info->{filename}, devnull);
 }
 
 =head1 METHODS
@@ -161,8 +161,8 @@ current section which is used to name the tests.
 =cut
 
 sub command {
-    my ( $self, $cmd, $par, $line ) = @_;
-    $self->{name} = ( split /(?:\r|\n|\r\n)/, $par, 2 )[0];
+    my ($self, $cmd, $par, $line) = @_;
+    $self->{name} = (split /(?:\r|\n|\r\n)/, $par, 2)[0];
 }
 
 =head2 B<textblock()>
@@ -207,18 +207,16 @@ list of tests to be executed.
 =cut
 
 sub verbatim {
-    my ( $self, $par, $line ) = @_;
+    my ($self, $par, $line) = @_;
     my $name = $self->{name}     ? $self->{name}     : q{};
     my $file = $self->input_file ? $self->input_file : 'stdin';
 
     my @lines = split /(?:\r|\n|\r\n)/, $par;
 
-    my ( @tests, $code, $expect );
+    my (@tests, $code, $expect);
     foreach (@lines) {
-        if ( /^\s+(>{3}|\.{3}|\$)\s+(.+)/
-            && ( $1 ne '...' || $code && @$code ) )
-        {
-            if ( !defined $expect || @$expect ) {
+        if (/^\s+(>{3}|\.{3}|\$)\s+(.+)/ && ($1 ne '...' || $code && @$code)) {
+            if (!defined $expect || @$expect) {
                 push(
                     @tests,
                     {
@@ -227,10 +225,8 @@ sub verbatim {
                     }
                 );
             }
-
             # capture code
-            if ( $1 eq '...' ) {
-
+            if ($1 eq '...') {
                 # capture multiline code
                 $code->[$#$code] .= $2;
             }
@@ -238,21 +234,19 @@ sub verbatim {
                 push @$code, $2;
             }
         }
-        elsif ( /^\s*(.+)/ && $code && @$code ) {
-            push( @$expect, $1 );
+        elsif (/^\s*(.+)/ && $code && @$code) {
+            push(@$expect, $1);
         }
     }
 
     foreach (@tests) {
-
         # on first non-code line, with valid code accumlated
-        my $expect = eval( join( '', @{ $_->{expect} } ) );
+        my $expect = eval(join('', @{$_->{expect}}));
         die "$@\t$file, line $line" if $@;
-        push @{ $self->{tests} },
-          [ $name, $file, $line, $expect, @{ $_->{code} } ];
+        push @{$self->{tests}}, [$name, $file, $line, $expect, @{$_->{code}}];
     }
 
-    return @{ $self->{tests} };
+    return @{$self->{tests}};
 }
 
 =head2 B<test()>
@@ -278,59 +272,60 @@ with the expected output using B<Test::Builder::is_eq>.
 package Test::Doctest::Builder {
     use Test::Deep::NoTest qw(cmp_details deep_diag);
 
-      use base 'Test::Builder';
+    use base 'Test::Builder';
 
-      our $Test;
-      sub new { $Test ||= shift->create }
+    our $Test;
+    sub new { $Test ||= shift->create }
 
     sub is_eq {
         my $self = shift;
-        my ( $got, $expected, $test_name ) = @_;
-        if ( ref $expected ) {
-            my ( $ok, $stack ) = cmp_details( $got, $expected );
-            $self->diag( deep_diag($stack) )
-              unless $self->ok( $ok, $test_name );
+        my ($got, $expected, $test_name) = @_;
+        if (ref $expected) {
+            my ($ok, $stack) = cmp_details($got, $expected);
+            $self->diag(deep_diag($stack)) unless $self->ok($ok, $test_name);
             return;
         }
         $self->SUPER::is_eq(@_);
     }
-  }
+}
 
-  our ( $Result, $Check );
+our ($Result, $Check);
 
 sub test {
     my ($self) = @_;
     my $tests = $self->{tests};
 
     my $test = Test::Doctest::Builder->new;
-    $test->plan( tests => scalar @$tests ) unless $test->has_plan;
+    $test->plan(tests => scalar @$tests) unless $test->has_plan;
 
-    my ( @grouped, $current_group );
+    my (@grouped, $current_group);
     foreach (@$tests) {
-        if ( !defined($current_group) || $_->[0] ne $current_group->[0][0] ) {
-            push( @grouped, $current_group = [] );
+        if (!defined($current_group) || $_->[0] ne $current_group->[0][0]) {
+            push(@grouped, $current_group = []);
         }
-        push( @$current_group, $_ );
+        push(@$current_group, $_);
     }
 
     my $run = 0;
     foreach my $group (@grouped) {
-        my ( @group_code, @checks );
-        push( @group_code, "package $self->{package}" ) if $self->{package};
-        for ( my $i = 0 ; $i <= $#$group ; $i++ ) {
-            my ( $name, $file, $line, $expect, @code ) = @{ $group->[$i] };
+        my (@group_code, @checks);
+        push(@group_code, "package $self->{package}") if $self->{package};
+        for (my $i = 0 ; $i <= $#$group ; $i++) {
+            my ($name, $file, $line, $expect, @code) = @{$group->[$i]};
             my $outof =
-              $#$group > 0 ? sprintf( "%d/%d", $i + 1, $#$group + 1 ) : q();
+              $#$group > 0 ? sprintf("%d/%d", $i + 1, $#$group + 1) : q();
             my $test_name = "$name $outof ($file, $line)";
-            push( @checks,
-                sub { $test->is_eq( $Result, $expect, $test_name ) } );
+            push(@checks, sub { $test->is_eq($Result, $expect, $test_name) });
             my $result_line = pop(@code);
-            push( @group_code,
-                @code, "\$Test::Doctest::Result = $result_line",
-                "\$Test::Doctest::Check->()" );
+            push(
+                @group_code,
+                @code,
+                "\$Test::Doctest::Result = $result_line",
+                "\$Test::Doctest::Check->()"
+            );
         }
         local $Check = sub { shift(@checks)->() };
-        eval join( ";", @group_code );
+        eval join(";", @group_code);
         croak $@ if $@;
         $run += @$group;
     }
