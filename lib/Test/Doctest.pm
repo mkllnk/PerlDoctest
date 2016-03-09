@@ -206,6 +206,12 @@ list of tests to be executed.
 
 =cut
 
+
+package Test::Doctest::Expect {
+    use Test::Deep::NoTest ':all';
+}
+
+
 sub verbatim {
     my ($self, $par, $line) = @_;
     my $name = $self->{name}     ? $self->{name}     : q{};
@@ -235,17 +241,20 @@ sub verbatim {
             }
         }
         elsif (/^\s*(.+)/ && $code && @$code) {
+            # on first non-code line, with valid code accumlated
             push(@$expect, $1);
         }
     }
 
     foreach (@tests) {
-        # on first non-code line, with valid code accumlated
-        my $expect = eval(join('', @{$_->{expect}}));
+        my $expect = do {
+            package Test::Doctest::Expect;
+            eval(join('', @{$_->{expect}}));
+        };
+
         die "$@\t$file, line $line" if $@;
         push @{$self->{tests}}, [$name, $file, $line, $expect, @{$_->{code}}];
     }
-
     return @{$self->{tests}};
 }
 

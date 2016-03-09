@@ -26,7 +26,7 @@ Or it could look like this:
     >>> get_vegetables(
     ...     color => 'green'
     ... )
-    Test::Deep::bag(qw(broccoli cucumber cabbage zucchini))
+    bag(qw(broccoli cucumber cabbage zucchini))
 
 =cut
 ```
