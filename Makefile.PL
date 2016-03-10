@@ -14,9 +14,6 @@ WriteMakefile(
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
     },
-    BUILD_REQUIRES => {
-        'Test::More' => 0,
-    },
     PREREQ_PM => {
         'Data::Dumper' => 0,
         'Exporter' => 0,

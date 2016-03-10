@@ -1,8 +1,4 @@
 language: perl
+
 perl:
   - "5.14"
-
-install:
-  - cpanm Test::More -v --notest
-
-script: "prove -l -r"
