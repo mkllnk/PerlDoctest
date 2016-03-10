@@ -348,17 +348,23 @@ __END__
 
 =head1 SEE ALSO
 
-L<Pod::Parser>, L<Test::Builder>
+L<Pod::Parser>, L<Test::Builder>, L<Test::Deep>
 
 B<Pod::Parser> defines the parser interface used to extract the tests.
 
 B<Test::Builder> is used to plan the tests and determine the results.
 
-=head1 AUTHOR
+B<Test::Deep> is used to compare test result with expected value.
+
+=head1 AUTHORS
 
 Bryan Cardillo E<lt>dillo@cpan.orgE<gt>
 
 Andrei Fyodorov E<lt>afyodorov@cpan.orgE<gt>
+
+L<Git repository|https://github.com/mkllnk/PerlDoctest> is maintained by Maikel Linke E<lt>mkllnk@web.deE<gt>
+
+Please submit bugs to L<the issue tracker|https://github.com/mkllnk/PerlDoctest/issues>.
 
 =head1 COPYRIGHT AND LICENSE
 
